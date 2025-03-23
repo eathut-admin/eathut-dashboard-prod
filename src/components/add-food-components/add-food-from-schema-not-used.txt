@@ -1,0 +1,96 @@
+import { z } from "zod";
+
+export const addNewFoodFormSchema = z.object({
+  food_name: z.string().min(1, {
+    message: "Food name is required.",
+  }),
+  mrp: z
+    .string()
+    .min(1, {
+      message: "MRP is required.",
+    })
+    .regex(/^(?!0(\.0{1,2})?$)\d+(\.\d{1,5})?$/, "Invalid MRP"),
+  restaurant_price: z
+    .string()
+    .min(1, {
+      message: "Restaurant price is required.",
+    })
+    .regex(/^(?!0(\.0{1,2})?$)\d+(\.\d{1,5})?$/, "Invalid restaurant price"),
+  delivery_charge: z
+    .string()
+    .min(1, {
+      message: "Delivery charge is required.",
+    })
+    .regex(/^(?!0(\.0{1,2})?$)\d+(\.\d{1,5})?$/, "Invalid delivery charge"),
+  company_charge: z
+    .string()
+    .min(1, {
+      message: "Company charge is required.",
+    })
+    .regex(/^(?!0(\.0{1,2})?$)\d+(\.\d{1,5})?$/, "Invalid company charge"),
+  packaging_time: z
+    .string()
+    .min(1, {
+      message: "Packaging time is required.",
+    })
+    .regex(/^[0-9]+$/, "Invalid packaging time"),
+  profit: z
+    .string()
+    .min(1, {
+      message: "Profit is required.",
+    })
+    .regex(/^(?!0(\.0{1,2})?$)\d+(\.\d{1,5})?$/, "Invalid profit"),
+  discount: z
+    .string()
+    .min(1, {
+      message: "Discount is required.",
+    })
+    .regex(/^(?!0(\.0{1,2})?$)\d+(\.\d{1,5})?$/, "Invalid discount"),
+  preparation_time: z
+    .string()
+    .min(1, {
+      message: "Preparation time is required.",
+    })
+    .regex(/^[0-9]+$/, "Invalid preparation time"),
+  food_tags: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        return val
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0);
+      }
+      return val;
+    },
+    z.array(z.string()).min(1, {
+      message: "At least one food tag is required.",
+    })
+  ),
+  category: z.string().min(1, {
+    message: "Food category is required.",
+  }),
+  restaurant: z.string().min(1, {
+    message: "Restaurant is required.",
+  }),
+  description: z.string().min(1, {
+    message: "Description is required.",
+  }),
+  zip_code: z.string().min(1, {
+    message: "Zip code is required.",
+  }),
+  food_image: z
+    .union([z.instanceof(File, { message: "Image is required" }), z.null()])
+    .refine((file) => file !== null, "Image is required")
+    .refine(
+      (file) => file !== null && file.size < 3000000,
+      "Image size should be less than 3mb"
+    )
+    .refine(
+      (file) =>
+        file !== null &&
+        (file.type === "image/jpeg" ||
+          file.type === "image/png" ||
+          file.type === "image/jpg"),
+      "Image should be in jpeg, png or jpg format"
+    ),
+});

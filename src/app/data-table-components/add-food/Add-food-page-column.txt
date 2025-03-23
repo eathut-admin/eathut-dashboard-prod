@@ -1,0 +1,166 @@
+"use client";
+
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTableColumnHeader } from "../data-table-column-header";
+import { Button } from "@/components/ui/button";
+import ButtonLoadingAnimation from "@/components/loading-animations/Button-animation";
+import EditCouponDataDialog from "@/components/coupon-page-components/edit-coupon-dialog";
+import { BsTrash } from "react-icons/bs";
+import { DeleteAlertDialog } from "@/components/alert-components/delete-alert";
+
+interface AllFoodColumnProps {
+  handleDelete: (queryId: string) => void;
+  handleDeactivate: (queryId: string, status: boolean) => void;
+  buttonLoadingDelete: Record<string, boolean>;
+  buttonLoadingDeactivate: Record<string, boolean>;
+}
+
+export const AddFoodPageColumns = ({
+  handleDelete,
+  buttonLoadingDelete,
+}: AllFoodColumnProps): ColumnDef<any>[] => {
+  return [
+    {
+      id: "serial_number",
+      accessorKey: "serial_number",
+      header: () => <span>##</span>,
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-center items-center">
+            <span>0{row.index + 1}</span>{" "}
+          </div>
+        );
+      },
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "coupon_code",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Coupon Code" />
+      ),
+      cell: ({ row }) => (
+        <div className="flex justify-start">{row.getValue("coupon_code")}</div>
+      ),
+      enableSorting: true,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "used",
+      header: ({ column }) => (
+        <div className="flex justify-center items-center">
+          <DataTableColumnHeader column={column} title="Used" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-center items-center">
+            <span className="capitalize">{row.getValue("used")}</span>
+          </div>
+        );
+      },
+      enableSorting: true,
+      filterFn: (row, id, value) => {
+        const rowDate = new Date(row.getValue(id));
+        const [startDate, endDate] = value;
+        return rowDate >= startDate && rowDate <= endDate;
+      },
+    },
+    {
+      accessorKey: "add_date",
+      header: ({ column }) => (
+        <div className="flex justify-center items-center">
+          <DataTableColumnHeader column={column} title="Add Date" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-center items-center">
+            <span className="capitalize">{row.getValue("add_date")}</span>
+          </div>
+        );
+      },
+      enableSorting: true,
+      filterFn: (row, id, value) => {
+        const rowDate = new Date(row.getValue(id));
+        const [startDate, endDate] = value;
+        return rowDate >= startDate && rowDate <= endDate;
+      },
+    },
+    {
+      accessorKey: "exp_date",
+      header: ({ column }) => (
+        <div className="flex justify-center items-center">
+          <DataTableColumnHeader column={column} title="Exp Date" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-center items-center">
+            <span className="capitalize">{row.getValue("exp_date")}</span>
+          </div>
+        );
+      },
+      enableSorting: true,
+      filterFn: (row, id, value) => {
+        const rowDate = new Date(row.getValue(id));
+        const [startDate, endDate] = value;
+        return rowDate >= startDate && rowDate <= endDate;
+      },
+    },
+    {
+      accessorKey: "time",
+      header: ({ column }) => (
+        <div className="flex justify-center items-center">
+          <DataTableColumnHeader column={column} title="Time" />
+        </div>
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-center items-center">
+            <span className="capitalize">{row.getValue("time")}</span>
+          </div>
+        );
+      },
+      enableSorting: true,
+      filterFn: (row, id, value) => {
+        const rowDate = new Date(row.getValue(id));
+        const [startDate, endDate] = value;
+        return rowDate >= startDate && rowDate <= endDate;
+      },
+    },
+    {
+      accessorKey: "actions",
+      header: "Action",
+      cell: ({ row }) => {
+        const couponId = row.original["_id"];
+        const data = row.original;
+        return (
+          <div className="flex justify-center items-center gap-2">
+            <EditCouponDataDialog couponData={data ? data : []}>
+              <Button variant="default" className="w-24">
+                Edit
+              </Button>
+            </EditCouponDataDialog>
+
+            <DeleteAlertDialog
+              onConfirm={() => handleDelete(couponId)}
+              onCancel={() => {}}
+              name={row.original["coupon_code"]}>
+              <Button
+                variant="destructive"
+                className="w-28 h-10"
+                disabled={buttonLoadingDelete[couponId]}>
+                {buttonLoadingDelete[couponId] ? (
+                  <ButtonLoadingAnimation text="Deleting" />
+                ) : (
+                  <BsTrash />
+                )}
+              </Button>
+            </DeleteAlertDialog>
+          </div>
+        );
+      },
+    },
+  ];
+};

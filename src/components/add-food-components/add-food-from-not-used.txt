@@ -1,0 +1,710 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "../ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import ButtonLoadingAnimation from "../loading-animations/Button-animation";
+import { FaArrowRightLong } from "react-icons/fa6";
+import { addNewFoodFormSchema } from "./add-food-form-schema";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+
+import { IoFastFoodOutline, IoImages } from "react-icons/io5";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { RiRestaurantFill } from "react-icons/ri";
+import { AiOutlineTruck } from "react-icons/ai";
+import { LuIndianRupee } from "react-icons/lu";
+import { GoStopwatch } from "react-icons/go";
+import { PiCity } from "react-icons/pi";
+import { FaTags } from "react-icons/fa6";
+import { PiPiggyBank } from "react-icons/pi";
+import { TbRosetteDiscount } from "react-icons/tb";
+import { GiBoxUnpacking } from "react-icons/gi";
+import { GiRiceCooker } from "react-icons/gi";
+import { Textarea } from "../ui/textarea";
+import { BiCategoryAlt } from "react-icons/bi";
+import { TbFileDescription } from "react-icons/tb";
+import { GrRestaurant } from "react-icons/gr";
+import { LuMapPin } from "react-icons/lu";
+import { AiOutlineCloudUpload } from "react-icons/ai";
+import { RxCross2 } from "react-icons/rx";
+
+const exampleRestaurants = [
+  {
+    _id: "1",
+    name: "Burger King",
+    pin_code: "123456",
+  },
+  {
+    _id: "2",
+    name: "Dominos",
+    pin_code: "987654",
+  },
+  {
+    _id: "3",
+    name: "KFC",
+    pin_code: "564231",
+  },
+];
+
+const exampleCategories = [
+  {
+    _id: "1",
+    name: "Burger King",
+  },
+  {
+    _id: "2",
+    name: "Dominos",
+  },
+  {
+    _id: "3",
+    name: "KFC",
+  },
+];
+
+const AddFoodForm = () => {
+  const form = useForm<z.infer<typeof addNewFoodFormSchema>>({
+    resolver: zodResolver(addNewFoodFormSchema),
+    defaultValues: {
+      food_name: "",
+      mrp: "",
+      restaurant_price: "",
+      delivery_charge: "",
+      company_charge: "",
+      packaging_time: "",
+      profit: "",
+      discount: "",
+      preparation_time: "",
+      food_tags: [],
+      category: "",
+      description: "",
+      restaurant: "",
+      zip_code: "",
+      food_image: undefined,
+    },
+  });
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [restaurants, setRestaurants] = useState<any[]>(exampleRestaurants);
+  const [categories, setCategories] = useState<any[]>(exampleCategories);
+  const [categoriesLoading, setCategoriesLoading] = useState<boolean>(false);
+  const [restaurantsLoading, setRestaurantsLoading] = useState<boolean>(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedImageFileName, setSelectedImageFileName] =
+    useState<string>("");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImageFileName(file.name);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+
+      form.setValue("food_image", file);
+    }
+  };
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     setCategoriesLoading(true);
+  //     setRestaurantsLoading(true);
+  //     try {
+  //       const [categoriesResponse, restaurantsResponse] = await Promise.all([
+  //         GetAllCategory(),
+  //         GetAllRestaurant(),
+  //       ]);
+
+  //       if (
+  //         (categoriesResponse && categoriesResponse.statusCode === 200) ||
+  //         categoriesResponse.success
+  //       ) {
+  //         setCategories(categoriesResponse.data);
+  //       } else {
+  //         setError("Failed to fetch categories!");
+  //       }
+
+  //       if (
+  //         (restaurantsResponse && restaurantsResponse.statusCode === 200) ||
+  //         restaurantsResponse.success
+  //       ) {
+  //         setRestaurants(restaurantsResponse.data);
+  //       } else {
+  //         setError("Failed to fetch restaurants!");
+  //       }
+  //     } catch (error: any) {
+  //       setError(error.message);
+  //     } finally {
+  //       setCategoriesLoading(false);
+  //       setRestaurantsLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setSelectedImageFileName("");
+    form.setValue("food_image", undefined as unknown as File);
+  };
+
+  function onSubmit(values: z.infer<typeof addNewFoodFormSchema>) {
+    setLoading(true);
+
+    setLoading(false);
+    setImagePreview(null);
+    setSelectedImageFileName("");
+    form.reset();
+  }
+
+  return (
+    <main className="pt-8">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="mb-5 grid justify-end">
+            <section className="relative grid justify-start border border-gray-400 dark:border-gray-700 rounded-md w-full sm:w-96 h-72 cursor-not-allowed">
+              {imagePreview ? (
+                <div className="flex flex-col items-center overflow-hidden">
+                  <div className="bg-green-800 w-full h-72 overflow-hidden rounded-md">
+                    <Image
+                      width={200}
+                      height={200}
+                      src={imagePreview}
+                      alt="Image preview"
+                      className="w-full h-full object-fill object-bottom aspect-video"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="grid place-items-center gap-2">
+                    <AiOutlineCloudUpload className="text-7xl" />
+                    <p className="text-sm">No Image file Selected</p>
+                  </div>
+                </div>
+              )}
+            </section>
+            <div className="flex justify-between gap-3 translate-y-1">
+              <FormField
+                control={form.control}
+                name="food_image"
+                render={() => (
+                  <FormItem>
+                    <FormControl>
+                      <div
+                        className={`border h-10 rounded-md flex items-center relative text-gray-500 dark:text-gray-400 overflow-scroll border-gray-400 dark:border-gray-700 ${
+                          imagePreview ? "w-[21rem]" : "w-96"
+                        }`}>
+                        <div className="bg-[#7fb222] h-full px-3 dark:text-white text-[#000] grid place-items-center">
+                          <IoImages />
+                        </div>
+                        <span className="text-[13.5px] mx-4 inline-block font-normal">
+                          {selectedImageFileName ? (
+                            <span className="text-[#000] dark:text-white">
+                              {selectedImageFileName}
+                            </span>
+                          ) : (
+                            "Upload Image"
+                          )}
+                        </span>
+                        <Input
+                          type="file"
+                          accept="image/jpeg, image/png, image/jpg"
+                          title="Select Image"
+                          onChange={handleFileChange}
+                          className="absolute opacity-0 w-full h-full cursor-pointer top-0 overflow-x-auto"
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {imagePreview && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="w-10"
+                  onClick={handleRemoveImage}>
+                  <RxCross2 />
+                </Button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-x-4 gap-y-6">
+            <FormField
+              control={form.control}
+              name="food_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Food Name</FormLabel>
+                  <FormControl>
+                    <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md">
+                      <span>
+                        <IoFastFoodOutline className="text-lg ml-1" />
+                      </span>
+                      <Input
+                        autoComplete="off"
+                        disabled={loading}
+                        placeholder="Enter food name here..."
+                        className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-6">
+              <FormField
+                control={form.control}
+                name="mrp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Maximum Retail Price (MRP)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <GiTakeMyMoney className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter mrp here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <LuIndianRupee className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="restaurant_price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Restaurant Price (MRP)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <RiRestaurantFill className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter restaurant price here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <LuIndianRupee className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="delivery_charge"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Delivery Charge (MRP)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <AiOutlineTruck className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter delivery charge here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <LuIndianRupee className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="company_charge"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Charge (MRP)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <PiCity className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter company charge here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <LuIndianRupee className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-6">
+              <FormField
+                control={form.control}
+                name="profit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Profit Amount (MRP)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <PiPiggyBank className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter profit amount here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <LuIndianRupee className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="discount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Discount Amount (MRP)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <TbRosetteDiscount className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter discount amount here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <LuIndianRupee className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="packaging_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Packaging Time (in minutes)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <GiBoxUnpacking className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter packaging time here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <GoStopwatch className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="preparation_time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preparation Time (in minutes)</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md overflow-hidden">
+                        <span>
+                          <GiRiceCooker className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter preparation time here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                        <span className="h-11 px-2.5 flex items-center bg-[#7fb222]">
+                          <GoStopwatch className="text-sm" />
+                        </span>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="food_tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Food Tags (seperated by comma)</FormLabel>
+                  <FormControl>
+                    <div className="relative flex items-start border border-gray-400 dark:border-gray-700 pl-2 rounded-md">
+                      <span>
+                        <FaTags className="text-lg ml-1 mt-2.5" />
+                      </span>
+                      <Textarea
+                        autoComplete="off"
+                        disabled={loading}
+                        placeholder="Enter food tags here..."
+                        className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                        {...field}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-x-4 gap-y-6">
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md">
+                        <span>
+                          <BiCategoryAlt className="text-lg ml-1" />
+                        </span>
+                        <Select
+                          {...field}
+                          value={field.value}
+                          onValueChange={field.onChange}>
+                          <SelectTrigger className="border-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent position="popper">
+                            <ScrollArea>
+                              {categoriesLoading ? (
+                                <div>
+                                  <ButtonLoadingAnimation text="Loading..." />
+                                </div>
+                              ) : categories.length > 0 ? (
+                                <>
+                                  {categories.map((categories) => (
+                                    <SelectItem
+                                      key={categories._id}
+                                      value={categories.name}>
+                                      {categories.name}
+                                    </SelectItem>
+                                  ))}
+                                </>
+                              ) : (
+                                <div className="text-[10px] -translate-y-1 inline-block bg-yellow-500 text-black px-[14px] py-0.5 rounded-full">
+                                  No category found
+                                </div>
+                              )}
+                            </ScrollArea>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Food Description</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md">
+                        <span>
+                          <TbFileDescription className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled={loading}
+                          placeholder="Enter food description here..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="restaurant"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Restaurant Name</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md">
+                        <span>
+                          <GrRestaurant className="text-lg ml-1" />
+                        </span>
+                        <Select
+                          {...field}
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            const selectedRestaurant = restaurants.find(
+                              (restaurant) => restaurant.name === value
+                            );
+                            if (selectedRestaurant) {
+                              form.setValue(
+                                "zip_code",
+                                selectedRestaurant.pin_code
+                              );
+                            }
+                          }}>
+                          <SelectTrigger className="border-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11">
+                            <SelectValue placeholder="Select a restaurant" />
+                          </SelectTrigger>
+                          <SelectContent position="popper">
+                            <ScrollArea>
+                              {restaurantsLoading ? (
+                                <div>
+                                  <ButtonLoadingAnimation text="Loading..." />
+                                </div>
+                              ) : restaurants.length > 0 ? (
+                                <>
+                                  {restaurants.map((restaurant) => (
+                                    <SelectItem
+                                      key={restaurant._id}
+                                      value={restaurant.name}>
+                                      {restaurant.name}
+                                    </SelectItem>
+                                  ))}
+                                </>
+                              ) : (
+                                <div className="text-[10px] -translate-y-1 inline-block bg-yellow-500 text-black px-[14px] py-0.5 rounded-full">
+                                  No restaurant found
+                                </div>
+                              )}
+                            </ScrollArea>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="zip_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Restaurant Pin Code</FormLabel>
+                    <FormControl>
+                      <div className="relative flex items-center border border-gray-400 dark:border-gray-700 pl-2 rounded-md">
+                        <span>
+                          <LuMapPin className="text-lg ml-1" />
+                        </span>
+                        <Input
+                          autoComplete="off"
+                          disabled
+                          placeholder="Select restaurant..."
+                          className="border-none focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 h-11 text-[13px]"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Select a restaurant from the list to get the pin code.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="mt-14">
+            <Button type="submit" className="group" disabled={loading}>
+              {loading ? (
+                <ButtonLoadingAnimation text="Adding..." />
+              ) : (
+                <>
+                  <FaArrowRightLong className="hidden md:inline-block group-hover:translate-x-6 transition-all duration-300" />
+                  <span className="md:group-hover:opacity-0 group-hover:-z-10 transition-all duration-300 text-[14px] font-semibold">
+                    Submit
+                  </span>
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </main>
+  );
+};
+
+export default AddFoodForm;
